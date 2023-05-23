@@ -5,6 +5,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var WebSocketClient = require('websocket').client;
+var client = new WebSocketClient();
+
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -26,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set Templating Engine
 app.use(expressLayouts)
-// app.set('layout', './layouts/full-width')
+app.set('layout', false)
 
 
 app.use('/', indexRouter);
@@ -55,13 +58,50 @@ io.on('connection', function (socket) {
 
   // Send to the connected user
   socket.emit('event', { message: 'Connected !!!!' });
-  
+
+  socket.on('', data => {
+    console.log(data);
+  });
   // On each "status", run this function
   socket.on('status', data => {
     console.log(data);
     io.emit('sensor', data);
   });
+
 });
+
+// Websocket client
+client.on('connectFailed', function(error) {
+  console.log('Connect Error: ' + error.toString());
+});
+
+client.on('connect', function(connection) {
+  console.log('WebSocket Client Connected');
+  connection.on('error', function(error) {
+      console.log("Connection Error: " + error.toString());
+  });
+  connection.on('close', function() {
+      console.log('echo-protocol Connection Closed');
+  });
+  connection.on('message', function(message) {
+      if (message.type === 'utf8') {
+          console.log("Received: '" + message.utf8Data + "'");
+      }
+  });
+  
+  function sendNumber() {
+      if (connection.connected) {
+          var number = Math.round(Math.random() * 0xFFFFFF);
+          connection.sendUTF(number.toString());
+          setTimeout(sendNumber, 1000);
+      }
+  }
+  sendNumber();
+});
+
+client.connect('ws://192.168.0.187/', 'echo-protocol');
+
+//open server
 const port = process.env.PORT || 3000;
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);

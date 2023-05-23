@@ -8,16 +8,31 @@
         <p>Lorem ipsum...</p>
         </div>
         
-        <footer class="w3-container w3-blue">
-        <h5>Footer</h5>
-        </footer>
+    </div>
+    <!-- Find lorawan server -->
+    <div class="w3-card-4" style="width: 33.3333%; height: 100%;">
+        <header class="w3-container w3-blue">
+            <h2>Lorawan Server</h2>
+        </header>
+        
+        <div class="w3-container">
+        <p id="sensor_text">No Data</p>
+        </div>
+        
     </div>
 </div>
 
+
 <script src="/socket.io/socket.io.js"></script>
-<script>
+<!-- <script>
     var socket = io();
     socket.on('sensor', function(data) {
-        sensor_h2.innerHTML = data;
+        sensor_text.innerHTML = data;
+    });
+</script> -->
+<script>
+    var socket = io("wss://192.168.0.187");
+    socket.on('', function(data) {
+        console.log(data);
     });
 </script>
